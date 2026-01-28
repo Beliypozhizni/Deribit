@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 from celery.utils.log import get_task_logger
 
-from src.infrastructure.deribit.client import (
+from src.deribit.client import (
     DeribitClient,
     DeribitRateLimited,
     DeribitUnavailable,
