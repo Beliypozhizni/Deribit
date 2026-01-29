@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     celery_result_backend: str
 
     model_config = SettingsConfigDict(
-        env_file=os.getenv("ENV_FILE", "../.env"),
+        env_file=os.getenv("ENV_FILE", "./.env"),
         env_file_encoding="utf-8",
         extra="ignore",
     )
