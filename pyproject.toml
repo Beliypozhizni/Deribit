@@ -1,7 +1,6 @@
 [project]
 name = "testtaskderibit"
 version = "0.1.0"
-package-mode = false
 description = ""
 authors = [
     {name = "Beliy",email = "beliypozhizni@gmail.com"}
@@ -20,6 +19,8 @@ dependencies = [
     "alembic[asyncio] (>=1.18.2,<2.0.0)",
 ]
 
+[tool.poetry]
+package-mode = false
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
