@@ -21,7 +21,7 @@ celery_app.conf.update(
 
 celery_app.conf.beat_schedule = {
     "collect-deribit-prices-every-minute": {
-        "task": "src.worker.tasks.collect_prices",
+        "task": "src.worker.tasks.collect_and_save_prices",
         "schedule": 60.0,
     }
 }
