@@ -1,6 +1,7 @@
 [project]
 name = "testtaskderibit"
 version = "0.1.0"
+package-mode = false
 description = ""
 authors = [
     {name = "Beliy",email = "beliypozhizni@gmail.com"}
