@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class PriceDTO(BaseModel):
+class PriceBase(BaseModel):
     ticker: str
     price: float
     captured_ts_ms: int
