@@ -15,7 +15,8 @@ from .config import (
     INDEX_PRICE_KEY,
     RESULT_KEY,
 )
-from src.prices.schemas import PriceBase
+from src.domain.schemas.price import PriceFull
+from ..domain.enums import Ticker
 
 
 class DeribitError(Exception):
@@ -51,11 +52,6 @@ class DeribitClient:
     Deribit HTTP client (aiohttp).
     """
 
-    _TICKER_TO_INDEX_NAME: dict[str, str] = {
-        "btc_usd": "btc_usd",
-        "eth_usd": "eth_usd",
-    }
-
     def __init__(
         self,
         config: DeribitClientConfig | None = None,
@@ -87,18 +83,12 @@ class DeribitClient:
             await self._session.close()
         self._session = None
 
-    def _normalize_ticker(self, ticker: str) -> str:
-        t = ticker.strip().lower()
-        if t not in self._TICKER_TO_INDEX_NAME:
-            raise UnsupportedTicker(f"Unsupported ticker: {ticker!r}")
-        return t
-
     def _build_url(self) -> str:
         return urljoin(
             self._config.base_url.rstrip("/") + "/", self._config.endpoint.lstrip("/")
         )
 
-    async def get_index_price(self, ticker: str) -> PriceBase:
+    async def get_index_price(self, ticker: Ticker) -> PriceFull:
         """
         Fetch index price for a single ticker.
         """
@@ -106,14 +96,11 @@ class DeribitClient:
             self._session = self._create_session()
             self._owns_session = True
 
-        normalized = self._normalize_ticker(ticker)
-        index_name = self._TICKER_TO_INDEX_NAME[normalized]
         url = self._build_url()
-
         async with self._semaphore:
             try:
                 async with self._session.get(
-                    url, params={"index_name": index_name}
+                    url, params={"index_name": ticker.value}
                 ) as resp:
                     status = resp.status
 
@@ -158,13 +145,13 @@ class DeribitClient:
 
         captured_ts_ms = int(time.time() * 1000)
 
-        return PriceBase(
-            ticker=normalized,
+        return PriceFull(
+            ticker=ticker,
             price=price,
             captured_ts_ms=captured_ts_ms,
         )
 
-    async def get_index_prices(self, tickers: Iterable[str]) -> list[PriceBase]:
+    async def get_index_prices(self, tickers: Iterable[Ticker]) -> list[PriceFull]:
         """
         Fetch index price for multiple tickers.
         """
