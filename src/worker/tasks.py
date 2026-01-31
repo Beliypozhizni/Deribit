@@ -10,26 +10,28 @@ from src.deribit.client import (
     DeribitRateLimited,
     DeribitUnavailable,
 )
-from src.prices.crud import create_prices
-from ..models.db_helper import db_helper
-from ..prices.schemas import PriceBase
-
-logger = get_task_logger(__name__)
 
 event_loop = asyncio.new_event_loop()
 asyncio.set_event_loop(event_loop)
 
-TICKERS = ("btc_usd", "eth_usd")
+from src.models import db_helper
+from src.domain.schemas import PriceFull
+from src.prices.crud import create_prices
+from src.domain.enums import Ticker
+
+logger = get_task_logger(__name__)
+
+TICKERS = (Ticker.BTC_USD, Ticker.ETH_USD)
 
 
-async def _collect_prices_async() -> list[PriceBase]:
+async def _collect_prices_async() -> list[PriceFull]:
     async with DeribitClient() as client:
         prices = await client.get_index_prices(TICKERS)
 
     return prices
 
 
-async def _save_prices(prices: list[PriceBase]) -> None:
+async def _save_prices(prices: list[PriceFull]) -> None:
     async with db_helper.session_factory() as session:
         await create_prices(session=session, prices_in=prices)
 
