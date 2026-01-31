@@ -15,7 +15,7 @@ from .config import (
     INDEX_PRICE_KEY,
     RESULT_KEY,
 )
-from .dto import PriceDTO
+from src.prices.schemas import PriceBase
 
 
 class DeribitError(Exception):
@@ -98,7 +98,7 @@ class DeribitClient:
             self._config.base_url.rstrip("/") + "/", self._config.endpoint.lstrip("/")
         )
 
-    async def get_index_price(self, ticker: str) -> PriceDTO:
+    async def get_index_price(self, ticker: str) -> PriceBase:
         """
         Fetch index price for a single ticker.
         """
@@ -158,13 +158,13 @@ class DeribitClient:
 
         captured_ts_ms = int(time.time() * 1000)
 
-        return PriceDTO(
+        return PriceBase(
             ticker=normalized,
             price=price,
             captured_ts_ms=captured_ts_ms,
         )
 
-    async def get_index_prices(self, tickers: Iterable[str]) -> list[PriceDTO]:
+    async def get_index_prices(self, tickers: Iterable[str]) -> list[PriceBase]:
         """
         Fetch index price for multiple tickers.
         """
