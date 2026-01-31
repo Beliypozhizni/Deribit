@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.enums import Ticker
@@ -22,7 +22,10 @@ async def get_ticker_last_price(
     ticker: Ticker,
     session: AsyncSession = Depends(db_helper.session_dependency),
 ):
-    return await crud.read_last_price(session, ticker)
+    model = await crud.read_last_price(session, ticker)
+    if model is None:
+        raise HTTPException(status_code=404, detail="Price not found")
+    return model
 
 
 @router.get("/lastAtTime", response_model=PriceRead, status_code=200)
@@ -31,4 +34,7 @@ async def get_last_price_at_ts(
     ts: int,
     session: AsyncSession = Depends(db_helper.session_dependency),
 ):
-    return await crud.read_last_price_at_time(session, ticker, ts)
+    model = await crud.read_last_price_at_time(session, ticker, ts)
+    if model is None:
+        raise HTTPException(status_code=404, detail="Price not found")
+    return model
