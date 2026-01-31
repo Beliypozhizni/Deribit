@@ -1,10 +1,10 @@
-from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.models import Price
+from src.domain.enums import Ticker
 from src.domain.schemas.price import PriceFull
+from src.models import Price
 
 
 async def create_price(session: AsyncSession, price_in: PriceFull) -> Price:
@@ -31,37 +31,35 @@ async def create_prices(
     return models
 
 
-async def read_all_prices(session: AsyncSession, ticker: str) -> list[Price]:
+async def read_all_prices(session: AsyncSession, ticker: Ticker) -> list[Price]:
     stmt = (
         select(Price)
-        .where(Price.ticker == ticker)
+        .where(Price.ticker == ticker.value)
         .order_by(Price.captured_ts_ms.desc())
     )
     return list(await session.scalars(stmt))
 
 
-async def read_last_price(session: AsyncSession, ticker: str) -> Price | None:
+async def read_last_price(session: AsyncSession, ticker: Ticker) -> Price | None:
     stmt = (
         select(Price)
-        .where(Price.ticker == ticker)
+        .where(Price.ticker == ticker.value)
         .order_by(Price.captured_ts_ms.desc())
         .limit(1)
     )
-    result = await session.scalar(stmt)
-    if result:
-        return result
-    raise HTTPException(status_code=404, detail="Price not found")
+    return await session.scalar(stmt)
 
 
-async def read_last_price_at_time(session: AsyncSession, ticker: str, ts: int) -> Price:
+async def read_last_price_at_time(
+    session: AsyncSession,
+    ticker: Ticker,
+    ts: int,
+) -> Price | None:
     stmt = (
         select(Price)
-        .where(Price.ticker == ticker)
+        .where(Price.ticker == ticker.value)
         .where(Price.captured_ts_ms <= ts)
         .order_by(Price.captured_ts_ms.desc())
         .limit(1)
     )
-    result = await session.scalar(stmt)
-    if result:
-        return result
-    raise HTTPException(status_code=404, detail="Price not found")
+    return await session.scalar(stmt)
